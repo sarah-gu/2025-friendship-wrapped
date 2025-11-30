@@ -6,7 +6,7 @@ import { WrappedTheme } from "@/app/generated/prisma/enums";
 import { User, Edit2, Save } from "lucide-react";
 import MemoryGrid from "./MemoryGrid";
 import InviteButton from "./InviteButton";
-import { handleSignOut } from "@/app/utils/auth";
+import SignOutButton from "./SignOutButton";
 import type { Memory } from "@/app/types";
 import type { WrappedGetPayload } from "@/app/generated/prisma/models/Wrapped";
 
@@ -86,8 +86,9 @@ export default function EditableWrappedWall({
         );
       }
 
-      // Redirect to dashboard after successful creation/update
-      router.push("/dashboard");
+      // Reset submitting state
+      setIsSubmitting(false);
+      // Refresh the page to show updated data
       router.refresh();
     } catch (error) {
       console.error(
@@ -95,6 +96,11 @@ export default function EditableWrappedWall({
         error
       );
       setIsSubmitting(false);
+      alert(
+        `Failed to ${
+          isEditing ? "update" : "create"
+        } wrapped. Please try again.`
+      );
     }
   };
 
@@ -152,12 +158,7 @@ export default function EditableWrappedWall({
                 </span>
               </button>
 
-              <button
-                onClick={() => handleSignOut(router)}
-                className="text-slate-400 hover:text-white text-sm transition-colors ml-2"
-              >
-                Sign Out
-              </button>
+              <SignOutButton />
             </div>
           </div>
         </div>
@@ -204,9 +205,9 @@ export default function EditableWrappedWall({
                   >
                     {hostName || "Your Name"}
                     {!hostName && <Edit2 size={12} />}
+                    &apos;s Circle
                   </span>
                 )}
-                &apos;s Circle
               </div>
               {isEditingTitle ? (
                 <input

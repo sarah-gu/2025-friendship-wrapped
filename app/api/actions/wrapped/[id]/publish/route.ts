@@ -5,9 +5,10 @@ import { prisma } from "@/app/lib/prisma";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json(
@@ -29,7 +30,7 @@ export async function POST(
 
     // Verify ownership
     const existing = await prisma.wrapped.findFirst({
-      where: { id: params.id, ownerId: user.id },
+      where: { id, ownerId: user.id },
     });
 
     if (!existing) {
@@ -40,7 +41,7 @@ export async function POST(
     }
 
     const wrapped = await prisma.wrapped.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         isPublished: true,
       },

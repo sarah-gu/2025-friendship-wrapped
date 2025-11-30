@@ -46,7 +46,7 @@ export default async function Home() {
       </div>
 
       <div className="z-10 py-6 text-center text-slate-500 text-sm font-medium">
-        Powered by Gemini • Built for Chaos
+        Built by sgu • 2025
       </div>
     </div>
   );

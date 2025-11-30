@@ -47,7 +47,7 @@ export default async function Dashboard() {
   return (
     <>
       {wrapped ? (
-        <WrappedWall wrapped={wrapped} ownerName={user.name} />
+        <EditableWrappedWall wrapped={wrapped} ownerName={user.name || ""} />
       ) : (
         <EditableWrappedWall ownerName={user.name || ""} />
       )}

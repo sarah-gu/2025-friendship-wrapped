@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/app/lib/prisma";
+import { auth } from "@/auth";
 import WrappedWall from "@/app/components/WrappedWall";
 
 export default async function WrappedPage({
@@ -7,6 +8,7 @@ export default async function WrappedPage({
 }: {
   params: { slug: string };
 }) {
+  const session = await auth();
   const wrapped = await prisma.wrapped.findUnique({
     where: {
       slug: params.slug,
@@ -30,5 +32,11 @@ export default async function WrappedPage({
     notFound();
   }
 
-  return <WrappedWall wrapped={wrapped} ownerName={wrapped.owner?.name} />;
+  return (
+    <WrappedWall
+      wrapped={wrapped}
+      ownerName={wrapped.owner?.name}
+      isAuthenticated={!!session?.user}
+    />
+  );
 }

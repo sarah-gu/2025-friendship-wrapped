@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Plus, User } from "lucide-react";
-import { useRouter } from "next/navigation";
 import MemoryGrid from "./MemoryGrid";
 import InviteButton from "./InviteButton";
-import { handleSignOut } from "@/app/utils/auth";
+import UploadPhotoModal from "./UploadPhotoModal";
+import SignOutButton from "./SignOutButton";
+import CreateWrappedButton from "./CreateWrappedButton";
 import type { WrappedGetPayload } from "@/app/generated/prisma/models/Wrapped";
 import type { Memory } from "@/app/types";
 
@@ -17,10 +19,15 @@ type WrappedWithSubmissions = WrappedGetPayload<{
 interface WrappedWallProps {
   wrapped: WrappedWithSubmissions;
   ownerName?: string | null;
+  isAuthenticated?: boolean;
 }
 
-export default function WrappedWall({ wrapped, ownerName }: WrappedWallProps) {
-  const router = useRouter();
+export default function WrappedWall({
+  wrapped,
+  ownerName,
+  isAuthenticated = false,
+}: WrappedWallProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Submissions are already in Memory format (Memory = SubmissionModel)
   const memories: Memory[] = wrapped?.submissions || [];
@@ -48,13 +55,8 @@ export default function WrappedWall({ wrapped, ownerName }: WrappedWallProps) {
 
             <div className="flex gap-3 items-center">
               <InviteButton slug={wrapped?.slug} />
-
-              <button
-                onClick={() => handleSignOut(router)}
-                className="text-slate-400 hover:text-white text-sm transition-colors ml-2"
-              >
-                Sign Out
-              </button>
+              <CreateWrappedButton isAuthenticated={isAuthenticated} />
+              {isAuthenticated && <SignOutButton />}
             </div>
           </div>
         </div>
@@ -97,13 +99,20 @@ export default function WrappedWall({ wrapped, ownerName }: WrappedWallProps) {
         {/* Floating Action Button */}
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
           <button
-            // onClick={() => setIsModalOpen(true)}
+            onClick={() => setIsModalOpen(true)}
             className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 rounded-2xl font-bold text-lg text-white shadow-[0_10px_40px_-10px_rgba(236,72,153,0.5)] border border-white/20 transition-all hover:scale-[1.02] active:scale-95"
           >
             <Plus size={24} strokeWidth={3} /> Drop a Memory
           </button>
         </div>
       </div>
+
+      {/* Upload Photo Modal */}
+      <UploadPhotoModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        wrappedId={wrapped.id}
+      />
     </>
   );
 }
