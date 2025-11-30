@@ -40,14 +40,14 @@ export default function WrappedWall({
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-indigo-600 rounded-xl flex items-center justify-center font-black text-white text-sm shadow-lg shadow-pink-500/20">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-pink-500 to-indigo-600 rounded-xl flex items-center justify-center font-black text-white text-xs md:text-sm shadow-lg shadow-pink-500/20">
                 {currentYear.toString().slice(-2)}
               </div>
               <div>
-                <h1 className="font-bold text-white text-lg leading-none tracking-tight">
+                <h1 className="font-bold text-white text-sm md:text-lg leading-none tracking-tight">
                   Friendships
                 </h1>
-                <p className="text-xs text-slate-400 font-medium tracking-widest uppercase">
+                <p className="text-[10px] md:text-xs text-slate-400 font-medium tracking-widest uppercase">
                   Wrapped
                 </p>
               </div>
@@ -70,7 +70,7 @@ export default function WrappedWall({
         </div>
 
         {/* Main Content */}
-        <main className="relative z-10 flex-1 max-w-7xl mx-auto w-full pt-24 px-4 pb-32">
+        <main className="relative z-10 flex-1 max-w-7xl mx-auto w-full pt-28 md:pt-24 px-4 pb-32">
           {/* Intro Section */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-white/10 pb-8">
             <div className="space-y-2">
