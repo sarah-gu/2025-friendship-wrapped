@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+
+  // Auth.js relations
+  accounts      Account[]
+  sessions      Session[]
+
+  // Your app data
+  wrappeds      Wrapped[]           // walls this user owns
+  submissions   Submission[] @relation("UserSubmissions") // memories they've authored (optional)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+/**
+ * Your domain models: Friendship Wrapped.
+ */
+
+model Wrapped {
+  id            String        @id @default(cuid())
+
+  // Slug used in public URLs, e.g. /w/sarah-2025
+  slug          String        @unique
+
+  // Display info for the wall
+  title         String        // e.g. "Sarah’s 2025 Friendships Wrapped"
+  hostName      String        // label shown on the page
+  year          Int           // e.g. 2025
+  theme         WrappedTheme  @default(SPARKLY)
+  description   String?       // optional short blurb
+  coverImageUrl String?       // optional hero/cover image
+
+  // Ownership: only this user can manage/edit this wall
+  owner         User          @relation(fields: [ownerId], references: [id])
+  ownerId       String
+
+  // Story / lifecycle state
+  isPublished   Boolean       @default(false) // true when public "final" view is ready
+  isDeleted     Boolean       @default(false) // soft delete flag if you want it
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  submissions   Submission[]
+
+  @@index([ownerId, createdAt])
+}
+
+model Submission {
+  id           String    @id @default(cuid())
+
+  // Which wall this submission belongs to
+  wrapped      Wrapped   @relation(fields: [wrappedId], references: [id])
+  wrappedId    String
+
+  // Optional link to an authenticated user (if they were logged in when submitting)
+  author       User?     @relation("UserSubmissions", fields: [authorId], references: [id])
+  authorId     String?
+
+  // Soft friend identity (always used for display)
+  friendName   String?   // "Kevin", "Mystery Girl 🤫", etc.
+  friendHandle String?   // optional @handle or short label
+  friendLink   String?   // optional URL to IG / their own Wrapped / etc.
+
+  // Content
+  photoUrl     String    // compressed, web-friendly image URL
+  mainPrompt   String?   // required: "This sums up our 2025 because…"
+  mainText     String?   // optional: "3 words", inside joke, etc.
+  bonusTags    String?   // optional: "tags to describe the photo"
+  chaosScore   Int?      // optional 1–10 slider
+
+  // Moderation / ordering
+  isHidden     Boolean   @default(false) // host can hide from final story
+  position     Int       // ordering within a Wrapped (manual sort)
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([wrappedId])
+  @@index([authorId])
+  @@unique([wrappedId, position]) // each card has a unique position per wall
+}
+
+enum WrappedTheme {
+  SPARKLY
+  FILM
+  MINIMAL
+  Y2K
+  CHAOTIC
+  SOFT
+}
