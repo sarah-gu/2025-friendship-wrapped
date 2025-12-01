@@ -303,7 +303,7 @@ export default function EditableWrappedWall({
         </div> */}
 
           {/* Grid */}
-          <MemoryGrid memories={memories} />
+          <MemoryGrid memories={memories} isEditable={true} />
         </main>
       </form>
     </>

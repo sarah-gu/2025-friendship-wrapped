@@ -81,6 +81,9 @@ export default function WrappedWall({
               <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">
                 {wrapped?.title}
               </h2>
+              <p className="text-slate-300 text-lg font-medium  flex items-center gap-2 group">
+                {wrapped?.description}
+              </p>
             </div>
             <div className="text-right">
               <p className="text-4xl font-black text-white">

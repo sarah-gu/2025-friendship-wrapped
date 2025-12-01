@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   X,
   Upload,
@@ -167,10 +168,12 @@ const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
               {/* Image Preview */}
               <div className="w-full h-56 bg-black rounded-3xl overflow-hidden relative shadow-lg">
                 {preview && (
-                  <img
+                  <Image
                     src={preview}
                     alt="Preview"
-                    className="w-full h-full object-contain"
+                    fill
+                    className="object-contain"
+                    unoptimized
                   />
                 )}
                 <button

@@ -1,12 +1,49 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Memory } from "@/app/types";
-import { Trash2, Wand2, Sparkles, Quote } from "lucide-react";
+import { Trash2, Sparkles, Quote } from "lucide-react";
 
 interface MemoryGridProps {
   memories: Memory[];
+  isEditable?: boolean;
 }
 
-const MemoryGrid: React.FC<MemoryGridProps> = ({ memories }) => {
+const MemoryGrid: React.FC<MemoryGridProps> = ({
+  memories,
+  isEditable = false,
+}) => {
+  const router = useRouter();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (memoryId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!confirm("Are you sure you want to delete this memory?")) {
+      return;
+    }
+
+    setDeletingId(memoryId);
+    try {
+      const response = await fetch(`/api/actions/submissions/${memoryId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to delete memory");
+      }
+
+      // Refresh the page to show updated data
+      router.refresh();
+    } catch (error) {
+      console.error("Error deleting memory:", error);
+      alert("Failed to delete memory. Please try again.");
+      setDeletingId(null);
+    }
+  };
   if (memories.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center opacity-60">
@@ -30,22 +67,34 @@ const MemoryGrid: React.FC<MemoryGridProps> = ({ memories }) => {
         >
           {/* Image */}
           <div className="aspect-[4/5] relative bg-black overflow-hidden">
-            <img
+            <Image
               src={memory.photoUrl}
               alt={memory.mainPrompt || "Memory"}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
             />
             {/* Overlay Gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
 
             {/* Top Badge */}
-            {memory.mainPrompt && (
-              <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
+            <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-20">
+              {memory.mainPrompt && (
                 <span className="inline-block px-3 py-1 bg-white/10 backdrop-blur-md border border-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-full">
                   {memory.mainPrompt}
                 </span>
-              </div>
-            )}
+              )}
+              {isEditable && (
+                <button
+                  onClick={(e) => handleDelete(memory.id, e)}
+                  disabled={deletingId === memory.id}
+                  className="p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-white/10"
+                  aria-label="Delete memory"
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
+            </div>
 
             {/* Bottom Content overlaid on image for a 'Story' feel */}
             <div className="absolute bottom-0 left-0 right-0 p-5 pt-12">
@@ -68,18 +117,6 @@ const MemoryGrid: React.FC<MemoryGridProps> = ({ memories }) => {
                       Added by {memory.friendName}
                     </span>
                   )}
-
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
-                    {/* <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(memory.id);
-                      }}
-                      className="p-2 bg-red-600/80 hover:bg-red-500 backdrop-blur-md rounded-full text-white transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </button> */}
-                  </div>
                 </div>
               </div>
             </div>
