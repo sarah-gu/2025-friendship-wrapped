@@ -8,7 +8,7 @@ import {
   RefreshCcw,
   ArrowRight,
 } from "lucide-react";
-import { resizeImage } from "../utils/imageUtils";
+import { resizeImage, convertHeicToJpeg } from "../utils/imageUtils";
 import { getRandomTaglines } from "../utils/prompts";
 import { useRouter } from "next/navigation";
 import CreateWrappedPromptModal from "./CreateWrappedPromptModal";
@@ -61,8 +61,22 @@ const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       try {
+        let fileToProcess = file;
+
+        // Check if file is HEIC/HEIF and convert it
+        const isHeic =
+          file.type === "image/heic" ||
+          file.type === "image/heif" ||
+          file.name.toLowerCase().endsWith(".heic") ||
+          file.name.toLowerCase().endsWith(".heif");
+
+        if (isHeic) {
+          // Convert HEIC to JPEG
+          fileToProcess = await convertHeicToJpeg(file);
+        }
+
         // Resize the image
-        const resizedFile = await resizeImage(file, 1200, 1200, 0.8);
+        const resizedFile = await resizeImage(fileToProcess, 1200, 1200, 0.8);
         setImageFile(resizedFile);
 
         // Create preview using FileReader
@@ -75,6 +89,11 @@ const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
         setStep(2);
       } catch (err) {
         console.error("Image processing failed", err);
+        alert(
+          err instanceof Error
+            ? err.message
+            : "Failed to process image. Please try again."
+        );
       }
     }
   };
@@ -155,7 +174,7 @@ const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
             <div className="h-80 border-2 border-dashed border-slate-700 rounded-3xl hover:border-pink-500 hover:bg-slate-800/30 transition-all cursor-pointer relative group flex flex-col items-center justify-center text-center p-8">
               <input
                 type="file"
-                accept="image/*"
+                accept="image/*,.heic,.heif"
                 onChange={handleFileChange}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
@@ -168,7 +187,7 @@ const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
               <p className="text-base md:text-xl font-bold text-white mb-2">
                 Tap to upload
               </p>
-              <p className="text-slate-500 text-sm">PNG, JPG up to 5MB</p>
+              <p className="text-slate-500 text-sm">PNG, JPG, HEIC up to 5MB</p>
             </div>
           ) : (
             <div className="space-y-8">

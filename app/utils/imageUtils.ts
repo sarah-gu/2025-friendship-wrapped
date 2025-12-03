@@ -7,6 +7,53 @@ export const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 
+/**
+ * Converts HEIC/HEIF images to JPEG format
+ * @param file - The HEIC file to convert
+ * @returns A Promise that resolves to a JPEG File
+ */
+export const convertHeicToJpeg = async (file: File): Promise<File> => {
+  // Dynamically import heic2any to avoid SSR issues
+  const heic2any =
+    (await import("heic2any")).default || (await import("heic2any"));
+
+  try {
+    // Convert HEIC to JPEG
+    // heic2any accepts a blob and returns a blob or array of blobs
+    const convertedBlob = (await heic2any({
+      blob: file,
+      toType: "image/jpeg",
+      quality: 0.92,
+    })) as Blob | Blob[];
+
+    // heic2any returns an array, get the first item
+    const blob = Array.isArray(convertedBlob)
+      ? convertedBlob[0]
+      : convertedBlob;
+
+    if (!blob) {
+      throw new Error("Conversion returned no blob");
+    }
+
+    // Create a new File object with JPEG type
+    const jpegFile = new File(
+      [blob],
+      file.name.replace(/\.(heic|heif)$/i, ".jpg"),
+      {
+        type: "image/jpeg",
+        lastModified: Date.now(),
+      }
+    );
+
+    return jpegFile;
+  } catch (error) {
+    console.error("HEIC conversion failed:", error);
+    throw new Error(
+      "Failed to convert HEIC image. Please try a different format."
+    );
+  }
+};
+
 export const resizeImage = async (
   file: File,
   maxWidth = 1200,

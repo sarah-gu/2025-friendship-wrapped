@@ -86,55 +86,60 @@ export async function createWrappedCollage(
     });
   }
 
-  // Randomly select memories if we have more than the max
+  // Define valid grid sizes (complete grids only)
+  const VALID_GRID_SIZES = [1, 2, 4, 6, 9, 12, 15, 18, 21, 24];
   const MAX_MEMORIES = 24; // Higher cap for Instagram Story format
-  let selectedMemories = [...memories];
 
-  if (memories.length > MAX_MEMORIES) {
-    // Shuffle and take random selection
-    selectedMemories = [...memories]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, MAX_MEMORIES);
+  // Shuffle memories for random selection
+  let shuffledMemories = [...memories].sort(() => Math.random() - 0.5);
+
+  // Find the largest valid grid size that fits
+  let targetCount = memories.length;
+  if (targetCount > MAX_MEMORIES) {
+    targetCount = MAX_MEMORIES;
   }
 
+  // Truncate to the largest valid grid size that fits
+  const validSize = VALID_GRID_SIZES.filter(
+    (size) => size <= targetCount
+  ).reduce((max, size) => Math.max(max, size), 1);
+  const selectedMemories = shuffledMemories.slice(0, validSize);
   const memoryCount = selectedMemories.length;
 
-  // Calculate grid layout based on number of memories
-  // For vertical format, we can fit more rows
+  // Calculate grid layout based on exact memory count
   let cols = 3;
-  let rows = Math.ceil(memoryCount / cols);
+  let rows = 3;
 
-  // Adjust for better layouts
-  if (memoryCount <= 1) {
+  if (memoryCount === 1) {
     cols = 1;
     rows = 1;
-  } else if (memoryCount <= 2) {
+  } else if (memoryCount === 2) {
     cols = 2;
     rows = 1;
-  } else if (memoryCount <= 4) {
+  } else if (memoryCount === 4) {
     cols = 2;
     rows = 2;
-  } else if (memoryCount <= 6) {
+  } else if (memoryCount === 6) {
     cols = 3;
     rows = 2;
-  } else if (memoryCount <= 9) {
+  } else if (memoryCount === 9) {
     cols = 3;
     rows = 3;
-  } else if (memoryCount <= 12) {
+  } else if (memoryCount === 12) {
     cols = 3;
     rows = 4;
-  } else if (memoryCount <= 15) {
+  } else if (memoryCount === 15) {
     cols = 3;
     rows = 5;
-  } else if (memoryCount <= 18) {
+  } else if (memoryCount === 18) {
     cols = 3;
     rows = 6;
-  } else if (memoryCount <= 21) {
+  } else if (memoryCount === 21) {
     cols = 3;
     rows = 7;
-  } else {
+  } else if (memoryCount === 24) {
     cols = 3;
-    rows = 8; // Max 24 photos (3x8)
+    rows = 8;
   }
 
   const padding = 0; // No padding for edge-to-edge photos
