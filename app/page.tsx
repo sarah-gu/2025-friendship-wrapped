@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import SignInButton from "./components/SignInButton";
 
 export default async function Home() {
@@ -28,7 +29,7 @@ export default async function Home() {
           </span>
         </div>
 
-        <h1 className="text-6xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter mb-6 drop-shadow-2xl">
+        <h1 className="text-4xl md:text-6xl lg:text-8xl font-black text-white leading-[0.9] tracking-tighter mb-6 drop-shadow-2xl">
           2025 <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400">
             Friendships
@@ -37,12 +38,20 @@ export default async function Home() {
           Wrapped.
         </h1>
 
-        <p className="text-slate-300 text-lg md:text-xl font-medium leading-relaxed max-w-lg mx-auto mb-12">
+        <p className="text-slate-300 text-sm md:text-lg lg:text-xl font-medium leading-relaxed max-w-lg mx-auto mb-12">
           Share a link, let friends drop one photo and a short memory, then get
           a &ldquo;year in friendships&rdquo; you can post or keep.
         </p>
 
-        <SignInButton />
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+          <SignInButton />
+          <Link
+            href="/explore"
+            className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-white font-bold transition-all hover:scale-[1.02] active:scale-95"
+          >
+            Explore Walls
+          </Link>
+        </div>
       </div>
 
       <div className="z-10 py-6 text-center text-slate-500 text-sm font-medium">

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, User } from "lucide-react";
+import Link from "next/link";
+import { Plus, User, Compass } from "lucide-react";
 import MemoryGrid from "./MemoryGrid";
 import InviteButton from "./InviteButton";
 import UploadPhotoModal from "./UploadPhotoModal";
+import MemoryDetailModal from "./MemoryDetailModal";
 import SignOutButton from "./SignOutButton";
 import CreateWrappedButton from "./CreateWrappedButton";
 import type { WrappedGetPayload } from "@/app/generated/prisma/models/Wrapped";
@@ -28,6 +30,8 @@ export default function WrappedWall({
   isAuthenticated = false,
 }: WrappedWallProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Submissions are already in Memory format (Memory = SubmissionModel)
   const memories: Memory[] = wrapped?.submissions || [];
@@ -39,8 +43,12 @@ export default function WrappedWall({
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/5 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-pink-500 to-indigo-600 rounded-xl flex items-center justify-center font-black text-white text-xs md:text-sm shadow-lg shadow-pink-500/20">
+            <Link
+              href="/explore"
+              className="group flex items-center gap-3 cursor-pointer hover:opacity-90 transition-all relative"
+              title="Explore Walls"
+            >
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-pink-500 to-indigo-600 rounded-xl flex items-center justify-center font-black text-white text-xs md:text-sm shadow-lg shadow-pink-500/20 group-hover:scale-110 transition-transform">
                 {currentYear.toString().slice(-2)}
               </div>
               <div>
@@ -51,10 +59,19 @@ export default function WrappedWall({
                   Wrapped
                 </p>
               </div>
-            </div>
+              {/* Hover hint */}
+              <div className="absolute left-full ml-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap flex items-center gap-2 bg-slate-900/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/10">
+                <Compass size={14} className="text-pink-400" />
+                <span className="text-white text-xs font-bold">Explore</span>
+              </div>
+            </Link>
 
             <div className="flex gap-3 items-center">
-              <InviteButton slug={wrapped?.slug} />
+              <InviteButton
+                slug={wrapped?.slug}
+                hostName={ownerName || wrapped?.hostName}
+                year={currentYear}
+              />
               <CreateWrappedButton isAuthenticated={isAuthenticated} />
               {isAuthenticated && <SignOutButton />}
             </div>
@@ -78,15 +95,15 @@ export default function WrappedWall({
                 <User size={14} /> {ownerName || wrapped?.hostName}&apos;s
                 Circle
               </div>
-              <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-black text-white tracking-tight">
                 {wrapped?.title}
               </h2>
-              <p className="text-slate-300 text-lg font-medium  flex items-center gap-2 group">
+              <p className="text-slate-300 text-sm md:text-lg font-medium  flex items-center gap-2 group">
                 {wrapped?.description}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-4xl font-black text-white">
+              <p className="text-2xl md:text-4xl font-black text-white">
                 {memories.length}
               </p>
               <p className="text-slate-500 font-medium text-sm uppercase tracking-wider">
@@ -96,14 +113,20 @@ export default function WrappedWall({
           </div>
 
           {/* Grid */}
-          <MemoryGrid memories={memories} />
+          <MemoryGrid
+            memories={memories}
+            onMemoryClick={(memory) => {
+              setSelectedMemory(memory);
+              setIsDetailModalOpen(true);
+            }}
+          />
         </main>
 
         {/* Floating Action Button */}
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 rounded-2xl font-bold text-lg text-white shadow-[0_10px_40px_-10px_rgba(236,72,153,0.5)] border border-white/20 transition-all hover:scale-[1.02] active:scale-95"
+            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 rounded-2xl font-bold text-sm md:text-lg text-white shadow-[0_10px_40px_-10px_rgba(236,72,153,0.5)] border border-white/20 transition-all hover:scale-[1.02] active:scale-95"
           >
             <Plus size={24} strokeWidth={3} /> Drop a Memory
           </button>
@@ -115,6 +138,16 @@ export default function WrappedWall({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         wrappedId={wrapped.id}
+      />
+
+      {/* Memory Detail Modal */}
+      <MemoryDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedMemory(null);
+        }}
+        memory={selectedMemory}
       />
     </>
   );

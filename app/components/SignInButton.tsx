@@ -11,7 +11,7 @@ export default function SignInButton() {
   return (
     <button
       onClick={handleSignIn}
-      className="glass-panel px-8 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-2xl shadow-purple-900/50 transform transition-all hover:scale-[1.02] bg-white text-black hover:bg-slate-200 font-bold text-lg"
+      className="glass-panel px-8 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-2xl shadow-purple-900/50 transform transition-all hover:scale-[1.02] bg-white text-black hover:bg-slate-200 font-bold text-sm md:text-lg"
     >
       <span>Get Started</span>
       <ArrowRight size={24} />

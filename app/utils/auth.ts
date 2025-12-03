@@ -21,10 +21,23 @@ export async function handleSignOut(router: AppRouterInstance) {
 
 export async function handleCopyUrl(
   url: string,
-  setCopied: (copied: boolean) => void
+  setCopied: (copied: boolean) => void,
+  hostName?: string,
+  year?: number
 ) {
   try {
-    await navigator.clipboard.writeText(url);
+    // Create a catchy gen-z invite message
+    const yearText = year || new Date().getFullYear();
+    let message: string;
+
+    if (hostName) {
+      // Use possessive form: "Sarah's" or "Sarah invited you to drop a memory on her..."
+      message = `${hostName} wants you to drop a memory on their ${yearText} Friendship Wrapped! 🎉\n\n${url}`;
+    } else {
+      message = `Drop a memory on my ${yearText} Friendship Wrapped! 🎉\n\n${url}`;
+    }
+
+    await navigator.clipboard.writeText(message);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   } catch (error) {

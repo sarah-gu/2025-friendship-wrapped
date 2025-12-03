@@ -9,11 +9,13 @@ import { Trash2, Sparkles, Quote } from "lucide-react";
 interface MemoryGridProps {
   memories: Memory[];
   isEditable?: boolean;
+  onMemoryClick?: (memory: Memory) => void;
 }
 
 const MemoryGrid: React.FC<MemoryGridProps> = ({
   memories,
   isEditable = false,
+  onMemoryClick,
 }) => {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -50,7 +52,7 @@ const MemoryGrid: React.FC<MemoryGridProps> = ({
         <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-4">
           <Sparkles className="text-slate-400" size={32} />
         </div>
-        <p className="text-xl font-bold text-slate-300">
+        <p className="text-base md:text-xl font-bold text-slate-300">
           It&apos;s quiet in here...
         </p>
         <p className="text-slate-500 mt-2">Be the first to drop a photo.</p>
@@ -63,7 +65,8 @@ const MemoryGrid: React.FC<MemoryGridProps> = ({
       {memories.map((memory) => (
         <div
           key={memory.id}
-          className="group relative bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-white/5 transition-all duration-300 hover:border-pink-500/50 hover:shadow-pink-900/20 hover:-translate-y-1"
+          onClick={() => onMemoryClick?.(memory)}
+          className="group relative bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-white/5 transition-all duration-300 hover:border-pink-500/50 hover:shadow-pink-900/20 hover:-translate-y-1 cursor-pointer"
         >
           {/* Image */}
           <div className="aspect-[4/5] relative bg-black overflow-hidden">
@@ -105,7 +108,7 @@ const MemoryGrid: React.FC<MemoryGridProps> = ({
                       className="text-pink-500 mb-2 opacity-80"
                       size={20}
                     />
-                    <p className="text-white text-lg font-bold leading-tight font-['Space_Grotesk'] drop-shadow-md">
+                    <p className="text-white text-sm md:text-lg font-bold leading-tight font-['Space_Grotesk'] drop-shadow-md">
                       {memory.mainText}
                     </p>
                   </>

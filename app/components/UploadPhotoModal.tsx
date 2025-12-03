@@ -31,6 +31,7 @@ const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
   const [prompts, setPrompts] = useState<string[]>([]);
   const [selectedPrompt, setSelectedPrompt] = useState("");
   const [caption, setCaption] = useState("");
+  const [friendName, setFriendName] = useState("");
   const [loadingPrompts, setLoadingPrompts] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCreateWrappedModal, setShowCreateWrappedModal] = useState(false);
@@ -42,6 +43,7 @@ const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
       setPreview(null);
       setCaption("");
       setSelectedPrompt("");
+      setFriendName("");
       loadPrompts();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -86,6 +88,9 @@ const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
         formData.append("wrappedId", wrappedId);
         formData.append("mainPrompt", selectedPrompt);
         formData.append("mainText", caption);
+        if (friendName.trim()) {
+          formData.append("friendName", friendName.trim());
+        }
 
         const response = await fetch("/api/actions/submissions", {
           method: "POST",
@@ -133,7 +138,7 @@ const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
       >
         {/* Header */}
         <div className="p-6 border-b border-white/5 flex justify-between items-center">
-          <h2 className="text-2xl font-black text-white">
+          <h2 className="text-xl md:text-2xl font-black text-white">
             {step === 1 ? "Drop a Photo" : "Add the Vibe"}
           </h2>
           <button
@@ -160,7 +165,9 @@ const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
                   className="text-pink-500 group-hover:text-white"
                 />
               </div>
-              <p className="text-xl font-bold text-white mb-2">Tap to upload</p>
+              <p className="text-base md:text-xl font-bold text-white mb-2">
+                Tap to upload
+              </p>
               <p className="text-slate-500 text-sm">PNG, JPG up to 5MB</p>
             </div>
           ) : (
@@ -225,8 +232,25 @@ const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
                 </div>
               </div>
 
+              {/* Name Field */}
+              <div>
+                <label className="block text-sm font-bold text-slate-300 uppercase tracking-wide mb-2">
+                  Your Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={friendName}
+                  onChange={(e) => setFriendName(e.target.value)}
+                  placeholder="drop your @ or stay mysterious ✨"
+                  className="w-full bg-black/30 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-colors placeholder-slate-600"
+                />
+              </div>
+
               {/* Caption */}
               <div>
+                <label className="block text-sm font-bold text-slate-300 uppercase tracking-wide mb-2">
+                  Memory
+                </label>
                 <textarea
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
@@ -244,7 +268,7 @@ const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
             <button
               onClick={handleSubmit}
               disabled={!selectedPrompt || !caption || isSubmitting}
-              className="w-full py-4 bg-gradient-to-r from-pink-600 to-indigo-600 rounded-2xl font-bold text-white text-lg shadow-lg shadow-pink-900/20 hover:shadow-pink-900/40 hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+              className="w-full py-4 bg-gradient-to-r from-pink-600 to-indigo-600 rounded-2xl font-bold text-white text-sm md:text-lg shadow-lg shadow-pink-900/20 hover:shadow-pink-900/40 hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>

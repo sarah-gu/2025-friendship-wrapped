@@ -1,17 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Share2 } from "lucide-react";
 import InviteModal from "./InviteModal";
 import { handleCopyUrl } from "@/app/utils/auth";
 
 interface InviteButtonProps {
   slug: string | undefined;
+  hostName?: string;
+  year?: number;
+  shouldAutoOpen?: boolean;
 }
 
-export default function InviteButton({ slug }: InviteButtonProps) {
+export default function InviteButton({
+  slug,
+  hostName,
+  year,
+  shouldAutoOpen = false,
+}: InviteButtonProps) {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Auto-open modal if shouldAutoOpen prop is true
+  useEffect(() => {
+    if (shouldAutoOpen && slug) {
+      setIsInviteModalOpen(true);
+    }
+  }, [shouldAutoOpen, slug]);
 
   const wrappedUrl = slug
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/w/${slug}`
@@ -33,10 +48,9 @@ export default function InviteButton({ slug }: InviteButtonProps) {
         isOpen={isInviteModalOpen}
         url={wrappedUrl}
         onClose={() => setIsInviteModalOpen(false)}
-        onCopy={() => handleCopyUrl(wrappedUrl, setCopied)}
+        onCopy={() => handleCopyUrl(wrappedUrl, setCopied, hostName, year)}
         copied={copied}
       />
     </>
   );
 }
-

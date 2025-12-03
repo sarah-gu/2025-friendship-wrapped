@@ -1,4 +1,4 @@
-import { MEMORY_TAGLINES } from "@/app/consts";
+import { MEMORY_TAGLINES, DEFAULT_WRAPPED_TITLES } from "@/app/consts";
 
 /**
  * Get a random tagline from the MEMORY_TAGLINES array
@@ -7,6 +7,17 @@ import { MEMORY_TAGLINES } from "@/app/consts";
 export function getRandomTagline(): string {
   const randomIndex = Math.floor(Math.random() * MEMORY_TAGLINES.length);
   return MEMORY_TAGLINES[randomIndex];
+}
+
+/**
+ * Get a random default wrapped title
+ * @returns A random default wrapped title string
+ */
+export function getRandomDefaultTitle(): string {
+  const randomIndex = Math.floor(
+    Math.random() * DEFAULT_WRAPPED_TITLES.length
+  );
+  return DEFAULT_WRAPPED_TITLES[randomIndex];
 }
 
 /**

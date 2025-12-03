@@ -29,7 +29,7 @@ export default function CreateWrappedPromptModal({
       {/* Modal Content */}
       <div className="relative z-10 bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-white">
+          <h3 className="text-lg md:text-xl font-bold text-white">
             Create Your Own Wrapped Wall
           </h3>
           <button

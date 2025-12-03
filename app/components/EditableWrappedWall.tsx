@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { WrappedTheme } from "@/app/generated/prisma/enums";
-import { User, Edit2, Save } from "lucide-react";
+import { User, Edit2, Save, Download } from "lucide-react";
 import MemoryGrid from "./MemoryGrid";
 import InviteButton from "./InviteButton";
 import SignOutButton from "./SignOutButton";
+import CollagePreviewModal from "./CollagePreviewModal";
+import MemoryDetailModal from "./MemoryDetailModal";
+import { getRandomDefaultTitle } from "@/app/utils/prompts";
+import { DEFAULT_WRAPPED_TITLES } from "@/app/consts";
+import { createWrappedCollage } from "@/app/utils/collageUtils";
 import type { Memory } from "@/app/types";
 import type { WrappedGetPayload } from "@/app/generated/prisma/models/Wrapped";
 
@@ -37,8 +43,11 @@ export default function EditableWrappedWall({
   const router = useRouter();
   const isEditing = !!wrapped;
 
+  // Generate a random default title once (consistent across renders)
+  const defaultTitle = useMemo(() => getRandomDefaultTitle(), []);
+
   // Initialize state from wrapped if provided, otherwise use defaults
-  const [title, setTitle] = useState(wrapped?.title || "The Year In Review");
+  const [title, setTitle] = useState(wrapped?.title || defaultTitle);
   const [hostName, setHostName] = useState(wrapped?.hostName || ownerName);
   const [theme, setTheme] = useState<WrappedTheme>(
     wrapped?.theme || WrappedTheme.SPARKLY
@@ -51,8 +60,45 @@ export default function EditableWrappedWall({
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingHostName, setIsEditingHostName] = useState(false);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [shouldShowInviteModal, setShouldShowInviteModal] = useState(false);
+  const [isGeneratingCollage, setIsGeneratingCollage] = useState(false);
+  const [collageBlob, setCollageBlob] = useState<Blob | null>(null);
+  const [showCollagePreview, setShowCollagePreview] = useState(false);
+  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  const canSubmit = !!title && !!hostName;
+  // Store initial values to detect changes
+  const [initialValues, setInitialValues] = useState({
+    title: wrapped?.title || defaultTitle,
+    hostName: wrapped?.hostName || ownerName,
+    theme: wrapped?.theme || WrappedTheme.SPARKLY,
+    description: wrapped?.description || "",
+    coverImageUrl: wrapped?.coverImageUrl || "",
+  });
+
+  // Update initial values when wrapped changes
+  useEffect(() => {
+    if (wrapped) {
+      setInitialValues({
+        title: wrapped.title,
+        hostName: wrapped.hostName,
+        theme: wrapped.theme,
+        description: wrapped.description || "",
+        coverImageUrl: wrapped.coverImageUrl || "",
+      });
+    }
+  }, [wrapped, ownerName]);
+
+  // Check if there are any changes (only when editing)
+  const hasChanges = isEditing
+    ? title !== initialValues.title ||
+      hostName !== initialValues.hostName ||
+      theme !== initialValues.theme ||
+      description !== initialValues.description ||
+      coverImageUrl !== initialValues.coverImageUrl
+    : true; // Always allow submission when creating new
+
+  const canSubmit = !!title && !!hostName && hasChanges;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -88,6 +134,10 @@ export default function EditableWrappedWall({
 
       // Reset submitting state
       setIsSubmitting(false);
+
+      // Show invite modal after save
+      setShouldShowInviteModal(true);
+
       // Refresh the page to show updated data
       router.refresh();
     } catch (error) {
@@ -107,6 +157,31 @@ export default function EditableWrappedWall({
   const memories: Memory[] = wrapped?.submissions || [];
   const currentYear = wrapped?.year || new Date().getFullYear();
 
+  const handleExportCollage = async () => {
+    if (memories.length === 0) {
+      alert("Add some memories first before exporting!");
+      return;
+    }
+
+    setIsGeneratingCollage(true);
+    try {
+      const wrappedUrl = wrapped?.slug
+        ? `${typeof window !== "undefined" ? window.location.origin : ""}/w/${
+            wrapped.slug
+          }`
+        : "";
+
+      const blob = await createWrappedCollage(memories, hostName, wrappedUrl);
+      setCollageBlob(blob);
+      setShowCollagePreview(true);
+    } catch (error) {
+      console.error("Error generating collage:", error);
+      alert("Failed to generate collage. Please try again.");
+    } finally {
+      setIsGeneratingCollage(false);
+    }
+  };
+
   return (
     <>
       {/* Header Content */}
@@ -114,36 +189,59 @@ export default function EditableWrappedWall({
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-pink-500 to-indigo-600 rounded-xl flex items-center justify-center font-black text-white text-xs md:text-sm shadow-lg shadow-pink-500/20">
-                {currentYear.toString().slice(-2)}
-              </div>
-              <div>
-                <h1 className="font-bold text-white text-sm md:text-lg leading-none tracking-tight">
-                  Friendships
-                </h1>
-                <p className="text-[10px] md:text-xs text-slate-400 font-medium tracking-widest uppercase">
-                  Wrapped
-                </p>
-              </div>
-              {
-                <div className="relative inline-block ml-2 md:ml-4">
-                  <div className="absolute -inset-2 bg-gradient-to-r from-pink-500 to-cyan-500 rounded-lg blur opacity-75"></div>
-                  <span className="relative px-2 py-0.5 md:px-4 md:py-1 bg-black rounded-lg text-[10px] md:text-sm font-bold uppercase tracking-widest text-white border border-white/10">
-                    <span className="md:hidden">
-                      {isEditing ? "Edit" : "Create"}
-                    </span>
-                    <span className="hidden md:inline">
-                      {isEditing
-                        ? "Edit Your Wrapped Wall"
-                        : "Create Your Wrapped Wall"}
-                    </span>
-                  </span>
+              <Link
+                href="/explore"
+                className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+              >
+                <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-pink-500 to-indigo-600 rounded-xl flex items-center justify-center font-black text-white text-xs md:text-sm shadow-lg shadow-pink-500/20">
+                  {currentYear.toString().slice(-2)}
                 </div>
-              }
+                <div>
+                  <h1 className="font-bold text-white text-sm md:text-lg leading-none tracking-tight">
+                    Friendships
+                  </h1>
+                  <p className="text-[10px] md:text-xs text-slate-400 font-medium tracking-widest uppercase">
+                    Wrapped
+                  </p>
+                </div>
+              </Link>
+              <div className="relative inline-block ml-2 md:ml-4">
+                <div className="absolute -inset-2 bg-gradient-to-r from-pink-500 to-cyan-500 rounded-lg blur opacity-75"></div>
+                <span className="relative px-2 py-0.5 md:px-4 md:py-1 bg-black rounded-lg text-[10px] md:text-sm font-bold uppercase tracking-widest text-white border border-white/10">
+                  <span className="md:hidden">
+                    {isEditing ? "Edit" : "Create"}
+                  </span>
+                  <span className="hidden md:inline">
+                    {isEditing
+                      ? "Edit Your Wrapped Wall"
+                      : "Create Your Wrapped Wall"}
+                  </span>
+                </span>
+              </div>
             </div>
 
             <div className="flex gap-3 items-center">
-              {isEditing && <InviteButton slug={wrapped?.slug} />}
+              {isEditing && (
+                <>
+                  <InviteButton
+                    slug={wrapped?.slug}
+                    hostName={hostName}
+                    year={currentYear}
+                    shouldAutoOpen={shouldShowInviteModal}
+                  />
+                  <button
+                    onClick={handleExportCollage}
+                    disabled={isGeneratingCollage || memories.length === 0}
+                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-bold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Export collage for Instagram"
+                  >
+                    <Download size={16} />
+                    <span className="hidden sm:inline">
+                      {isGeneratingCollage ? "Generating..." : "Share"}
+                    </span>
+                  </button>
+                </>
+              )}
 
               <button
                 type="submit"
@@ -209,7 +307,7 @@ export default function EditableWrappedWall({
                     className="cursor-pointer hover:text-pink-300 transition-colors flex items-center gap-1 group"
                   >
                     {hostName || "Your Name"}
-                    {!hostName && <Edit2 size={12} />}
+                    <Edit2 size={12} className="text-pink-400/70" />
                     &apos;s Circle
                   </span>
                 )}
@@ -225,22 +323,19 @@ export default function EditableWrappedWall({
                       setIsEditingTitle(false);
                     }
                   }}
-                  placeholder={`e.g., ${hostName}'s 2025 Friendships Wrapped`}
+                  placeholder={defaultTitle}
                   required
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-4xl md:text-5xl font-black"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-2xl md:text-4xl lg:text-5xl font-black"
                   autoFocus
                 />
               ) : (
                 <h2
                   onClick={() => setIsEditingTitle(true)}
-                  className="text-4xl md:text-5xl font-black text-white tracking-tight cursor-pointer hover:text-slate-300 transition-colors flex items-center gap-2 group"
+                  className="text-2xl md:text-4xl lg:text-5xl font-black text-white tracking-tight cursor-pointer hover:text-slate-300 transition-colors flex items-center gap-2 group"
                 >
                   {title}
-                  {(title === "The Year In Review" || isEditing) && (
-                    <Edit2
-                      size={20}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    />
+                  {(DEFAULT_WRAPPED_TITLES.includes(title) || isEditing) && (
+                    <Edit2 size={20} className="text-slate-400" />
                   )}
                 </h2>
               )}
@@ -256,26 +351,21 @@ export default function EditableWrappedWall({
                     }
                   }}
                   placeholder="A short description of your friendship wrapped..."
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-lg font-medium leading-relaxed mt-4"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm md:text-lg font-medium leading-relaxed mt-4"
                   autoFocus
                 />
               ) : (
                 <p
                   onClick={() => setIsEditingDescription(true)}
-                  className="text-slate-300 text-lg font-medium leading-relaxed mt-4 cursor-pointer hover:text-slate-200 transition-colors flex items-center gap-2 group"
+                  className="text-slate-300 text-sm md:text-lg font-medium leading-relaxed mt-4 cursor-pointer hover:text-slate-200 transition-colors flex items-center gap-2 group"
                 >
                   {description || "Click to add description"}
-                  {!description && (
-                    <Edit2
-                      size={16}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    />
-                  )}
+                  <Edit2 size={16} className="text-slate-400" />
                 </p>
               )}
             </div>
             <div className="text-right">
-              <p className="text-4xl font-black text-white">
+              <p className="text-2xl md:text-4xl font-black text-white">
                 {memories.length}
               </p>
               <p className="text-slate-500 font-medium text-sm uppercase tracking-wider">
@@ -303,9 +393,37 @@ export default function EditableWrappedWall({
         </div> */}
 
           {/* Grid */}
-          <MemoryGrid memories={memories} isEditable={true} />
+          <MemoryGrid
+            memories={memories}
+            isEditable={true}
+            onMemoryClick={(memory) => {
+              setSelectedMemory(memory);
+              setIsDetailModalOpen(true);
+            }}
+          />
         </main>
       </form>
+
+      {/* Collage Preview Modal */}
+      <CollagePreviewModal
+        isOpen={showCollagePreview}
+        onClose={() => {
+          setShowCollagePreview(false);
+          setCollageBlob(null);
+        }}
+        imageBlob={collageBlob}
+        filename={`friendship-wrapped-${currentYear}.png`}
+      />
+
+      {/* Memory Detail Modal */}
+      <MemoryDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedMemory(null);
+        }}
+        memory={selectedMemory}
+      />
     </>
   );
 }
