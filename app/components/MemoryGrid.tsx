@@ -55,7 +55,7 @@ const MemoryGrid: React.FC<MemoryGridProps> = ({
           <Sparkles className="text-slate-400" size={32} />
         </div>
         <p className="text-base md:text-xl font-bold text-slate-300">
-          No memories yet? That&apos;s a choice 😅
+          {`${hostName}'s wall is waiting for the vibes ✨`}
         </p>
         <p className="text-slate-500 mt-2 text-sm md:text-base">
           {hostName

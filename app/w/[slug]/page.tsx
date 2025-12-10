@@ -27,7 +27,7 @@ export default async function WrappedPage({
       },
     },
   });
-  console.log("slug", params.slug);
+
   if (!wrapped) {
     notFound();
   }
@@ -35,7 +35,7 @@ export default async function WrappedPage({
   return (
     <WrappedWall
       wrapped={wrapped}
-      ownerName={wrapped.owner?.name}
+      ownerName={wrapped.hostName}
       isAuthenticated={!!session?.user}
       user={
         session?.user

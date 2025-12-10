@@ -56,7 +56,7 @@ export default function WrappedWall({
           setSelectedMemory(memory);
           setIsDetailModalOpen(true);
         }}
-        hostName={ownerName || wrapped?.hostName || ""}
+        hostName={wrapped?.hostName || ownerName || ""}
         footer={
           <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
             <button

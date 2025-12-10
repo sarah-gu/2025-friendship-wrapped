@@ -2,7 +2,6 @@ import { auth } from "@/auth";
 import { prisma } from "@/app/lib/prisma";
 import Link from "next/link";
 import Image from "next/image";
-import CreateWrappedButton from "@/app/components/CreateWrappedButton";
 import WrappedWallHeader from "@/app/components/WrappedWallHeader";
 
 export default async function ExplorePage() {
@@ -150,7 +149,7 @@ export default async function ExplorePage() {
                   {wrapped.title}
                 </h3>
                 <p className="text-slate-400 text-sm mb-3">
-                  {wrapped.owner?.name || wrapped.hostName}&apos;s Circle
+                  {wrapped.hostName || wrapped.owner?.name}&apos;s Circle
                 </p>
                 <div className="flex items-center justify-between text-xs text-slate-500">
                   <span>{wrapped._count.submissions} memories</span>
