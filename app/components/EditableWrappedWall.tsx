@@ -471,8 +471,7 @@ export default function EditableWrappedWall({
               </div>
             </div>
 
-            {/* Step strip - only show on empty wall */}
-            {memories.length === 0 && isEditing && wrapped.slug && (
+            {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 items-start sm:items-center pt-4 border-t border-white/5">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm">
@@ -499,7 +498,7 @@ export default function EditableWrappedWall({
                   </span>
                 </div>
               </div>
-            )}
+            }
           </div>
         </WrappedWallLayout>
       </form>
