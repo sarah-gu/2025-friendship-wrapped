@@ -33,7 +33,7 @@ export default function WrappedWallLayout({
       </div>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 max-w-7xl mx-auto w-full pt-28 md:pt-24 px-4 pb-8 overflow-y-auto min-h-0">
+      <main className="relative z-10 flex-1 max-w-7xl mx-auto w-full pt-28 md:pt-24 px-4 pb-24 md:pb-32 overflow-y-auto min-h-0">
         {children}
 
         {/* Empty State or Grid */}
@@ -53,4 +53,3 @@ export default function WrappedWallLayout({
     </div>
   );
 }
-

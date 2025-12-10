@@ -58,12 +58,13 @@ export default function WrappedWall({
         }}
         hostName={wrapped?.hostName || ownerName || ""}
         footer={
-          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
+          <div className="fixed bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 rounded-2xl font-bold text-sm md:text-lg text-white shadow-[0_10px_40px_-10px_rgba(236,72,153,0.5)] border border-white/20 transition-all hover:scale-[1.02] active:scale-95"
+              className="w-full flex items-center justify-center gap-2 md:gap-3 px-4 py-2.5 md:px-6 md:py-4 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 rounded-xl md:rounded-2xl font-bold text-xs md:text-lg text-white shadow-[0_10px_40px_-10px_rgba(236,72,153,0.5)] border border-white/20 transition-all hover:scale-[1.02] active:scale-95"
             >
-              <Plus size={24} strokeWidth={3} /> Drop a Memory
+              <Plus className="w-4 h-4 md:w-6 md:h-6" strokeWidth={3} />
+              <span>Drop a Memory</span>
             </button>
           </div>
         }
