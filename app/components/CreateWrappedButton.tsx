@@ -1,36 +1,22 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 import { signInWithGoogle } from "@/app/api/actions/auth/signin-action";
 
-interface CreateWrappedButtonProps {
-  isAuthenticated: boolean;
-}
-
-export default function CreateWrappedButton({
-  isAuthenticated,
-}: CreateWrappedButtonProps) {
-  const router = useRouter();
-
+export default function CreateWrappedButton() {
   const handleClick = async () => {
-    if (isAuthenticated) {
-      // Redirect to dashboard
-      router.push("/dashboard");
-    } else {
-      // Sign in with Google (same as main screen)
-      await signInWithGoogle();
-    }
+    // Sign in with Google (same as main screen)
+    await signInWithGoogle();
   };
 
   return (
-    <div className="relative inline-block">
-      <div className="absolute -inset-2 bg-gradient-to-r from-pink-500 to-cyan-500 rounded-lg blur opacity-75"></div>
-      <button
-        onClick={handleClick}
-        className="relative px-4 py-2 bg-black rounded-lg text-sm font-bold uppercase tracking-widest text-white border border-white/10 transition-all hover:scale-[1.02] active:scale-95"
-      >
-        {isAuthenticated ? "My 2025 Wrapped" : "Create 2025 Wrapped"}
-      </button>
-    </div>
+    <button
+      onClick={handleClick}
+      className="px-4 py-2 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 rounded-2xl font-bold text-sm text-white shadow-[0_10px_40px_-10px_rgba(236,72,153,0.5)] border border-white/20 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2 [.mobile-menu_&]:px-4 [.mobile-menu_&]:py-2 [.mobile-menu_&]:text-sm [.mobile-menu_&]:font-medium [.mobile-menu_&]:text-white [.mobile-menu_&]:hover:bg-white/10 [.mobile-menu_&]:transition-colors [.mobile-menu_&]:rounded-none [.mobile-menu_&]:border-none [.mobile-menu_&]:bg-transparent [.mobile-menu_&]:shadow-none [.mobile-menu_&]:flex [.mobile-menu_&]:items-center [.mobile-menu_&]:gap-2 [.mobile-menu_&]:hover:scale-100 [.mobile-menu_&]:active:scale-100"
+    >
+      Get My 2025 Wrapped
+      <ArrowRight size={16} />
+    </button>
   );
 }

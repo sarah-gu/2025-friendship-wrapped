@@ -10,12 +10,14 @@ interface MemoryGridProps {
   memories: Memory[];
   isEditable?: boolean;
   onMemoryClick?: (memory: Memory) => void;
+  hostName?: string;
 }
 
 const MemoryGrid: React.FC<MemoryGridProps> = ({
   memories,
   isEditable = false,
   onMemoryClick,
+  hostName,
 }) => {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -53,9 +55,13 @@ const MemoryGrid: React.FC<MemoryGridProps> = ({
           <Sparkles className="text-slate-400" size={32} />
         </div>
         <p className="text-base md:text-xl font-bold text-slate-300">
-          It&apos;s quiet in here...
+          No memories yet? That&apos;s a choice 😅
         </p>
-        <p className="text-slate-500 mt-2">Be the first to drop a photo.</p>
+        <p className="text-slate-500 mt-2 text-sm md:text-base">
+          {hostName
+            ? `Share your most unhinged photo of ${hostName} and let the chaos begin 🔥`
+            : "Share the link with your crew and watch the vibes roll in ✨"}
+        </p>
       </div>
     );
   }

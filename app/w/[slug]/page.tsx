@@ -37,6 +37,15 @@ export default async function WrappedPage({
       wrapped={wrapped}
       ownerName={wrapped.owner?.name}
       isAuthenticated={!!session?.user}
+      user={
+        session?.user
+          ? {
+              name: session.user.name || null,
+              image: session.user.image || null,
+              email: session.user.email || null,
+            }
+          : null
+      }
     />
   );
 }

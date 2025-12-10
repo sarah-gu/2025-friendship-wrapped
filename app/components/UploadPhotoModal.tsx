@@ -129,6 +129,7 @@ const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
           setShowCreateWrappedModal(true);
         } else {
           // Refresh the page to show the new submission
+          setIsSubmitting(false);
           router.refresh();
           onClose();
         }

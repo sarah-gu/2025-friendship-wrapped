@@ -2,14 +2,10 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import SignInButton from "./components/SignInButton";
+import { ArrowRight } from "lucide-react";
 
 export default async function Home() {
   const session = await auth();
-
-  // If user is signed in, redirect to dashboard
-  if (session?.user) {
-    redirect("/dashboard");
-  }
 
   return (
     <div className="min-h-screen bg-black flex flex-col relative overflow-hidden font-sans">
@@ -44,7 +40,17 @@ export default async function Home() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-          <SignInButton />
+          {session?.user ? (
+            <button
+              onClick={redirect("/dashboard")}
+              className="glass-panel px-8 py-4 rounded-2xl flex items-center justify-center gap-3 shadow-2xl shadow-purple-900/50 transform transition-all hover:scale-[1.02] bg-white text-black hover:bg-slate-200 font-bold text-sm md:text-lg"
+            >
+              <span>View My Wall</span>
+              <ArrowRight size={24} />
+            </button>
+          ) : (
+            <SignInButton />
+          )}
           <Link
             href="/explore"
             className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-white font-bold transition-all hover:scale-[1.02] active:scale-95"
