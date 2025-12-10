@@ -128,6 +128,7 @@ export default function WrappedWallHeader({
           {/* Mobile menu button and dropdown */}
           <div className="md:hidden relative flex flex-row" ref={menuRef}>
             {rightContent}
+            {!user && <CreateWrappedButton />}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 text-white hover:bg-white/10 rounded-full transition-all"
